@@ -115,12 +115,19 @@ class Platformer extends Phaser.Scene {
         my.vfx.coinCollect.stop();
 
         // Handle collision detection with coins
+
+        this.coinsCollected = 0;
+        this.coinText = this.add.text(1500/4, 950/4, String(this.coinsCollected), { fontFamily: '"Lucida Console", "Courier New", monospace' });
+        this.coinText.setScrollFactor(0);
+
         this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => {
             obj2.destroy();
             my.vfx.coinCollect.setPosition(obj2.x, obj2.y);
             my.vfx.coinCollect.start();
             my.vfx.coinCollect.explode();
             this.sound.play("coinCollect");
+            this.coinsCollected += 1;
+            this.coinText.text = String(this.coinsCollected);
         });
 
         // set up Phaser-provided cursor key input
