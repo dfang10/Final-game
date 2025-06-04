@@ -33,9 +33,21 @@ class Level2 extends Phaser.Scene {
 
         // Create a layer
         this.groundLayer = this.map.createLayer("Ground-n-Platforms", this.tileset, 0, 0);
+        this.endingLayer = this.map.createLayer("Win", this.tileset, 0, 0);
+        this.waterLayer = this.map.createLayer("Water", this.tileset, 0, 0);
+        this.spikesLayer = this.map.createLayer("Spikes", this.tileset, 0, 0);
         
         // Make it collidable
         this.groundLayer.setCollisionByProperty({
+            collides: true
+        });
+        this.endingLayer.setCollisionByProperty({
+             collides: true
+        });
+        this.waterLayer.setCollisionByProperty({
+            collides: true
+        });
+        this.spikesLayer.setCollisionByProperty({
             collides: true
         });
         this.playerSpawn = {
@@ -70,6 +82,19 @@ class Level2 extends Phaser.Scene {
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
+        this.physics.add.collider(my.sprite.player, this.waterLayer, () =>{
+            this.waterCollide();
+        });
+        this.physics.add.collider(my.sprite.player, this.endingLayer, () =>{
+             this.endCollide();
+        });
+        this.physics.add.collider(my.sprite.player, this.spikesLayer, () =>{
+            this.spikeCollide();
+        });
+
+        this.endingLayer.setCollisionByExclusion([-1]);
+        this.waterLayer.setCollisionByExclusion([-1]);
+        this.spikesLayer.setCollisionByExclusion([-1]);
 
 
         my.vfx.coinCollect = this.add.particles(0, 0, "kenny-particles", {
@@ -82,12 +107,18 @@ class Level2 extends Phaser.Scene {
         my.vfx.coinCollect.stop();
 
         // Handle collision detection with coins
+        this.coinsCollected = 0;
+        this.coinText = this.add.text(1500/4, 950/4, String(this.coinsCollected), { fontFamily: '"Lucida Console", "Courier New", monospace' });
+        this.coinText.setScrollFactor(0);
+        
         this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => {
             obj2.destroy();
             my.vfx.coinCollect.setPosition(obj2.x, obj2.y);
             my.vfx.coinCollect.start();
             my.vfx.coinCollect.explode();
             this.sound.play("coinCollect");
+            this.coinsCollected += 1;
+            this.coinText.text = String(this.coinsCollected);
         });
 
         // set up Phaser-provided cursor key input

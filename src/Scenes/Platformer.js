@@ -115,7 +115,6 @@ class Platformer extends Phaser.Scene {
         my.vfx.coinCollect.stop();
 
         // Handle collision detection with coins
-
         this.coinsCollected = 0;
         this.coinText = this.add.text(1500/4, 950/4, String(this.coinsCollected), { fontFamily: '"Lucida Console", "Courier New", monospace' });
         this.coinText.setScrollFactor(0);
