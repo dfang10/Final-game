@@ -133,6 +133,7 @@ class Platformer extends Phaser.Scene {
         cursors = this.input.keyboard.createCursorKeys();
 
         this.rKey = this.input.keyboard.addKey('R');
+        this.lKey = this.input.keyboard.addKey('L'); // skip to next level
 
         // debug key listener (assigned to D key)
         this.input.keyboard.on('keydown-D', () => {
@@ -176,11 +177,15 @@ class Platformer extends Phaser.Scene {
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
         this.sound.play("playerDamage");
+        this.coinsCollected -=1;
+        this.coinText.text = String(this.coinsCollected);
     }
 
     spikeCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
         this.sound.play("playerDamage");
+        this.coinsCollected -=1;
+        this.coinText.text = String(this.coinsCollected);
     }
 
     endCollide() {
@@ -270,6 +275,9 @@ class Platformer extends Phaser.Scene {
 
         if(Phaser.Input.Keyboard.JustDown(this.rKey)) {
             this.scene.restart();
+        }
+        if(Phaser.Input.Keyboard.JustDown(this.lKey)){
+            this.scene.start("level2");
         }
     }
 }

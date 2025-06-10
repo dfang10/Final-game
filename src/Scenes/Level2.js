@@ -11,6 +11,7 @@ class Level2 extends Phaser.Scene {
         this.JUMP_VELOCITY = -600;
         this.PARTICLE_VELOCITY = 50;
         this.SCALE = 2.0;
+        this.BOUNCE_VELOCITY = -700;
     }
 
     preload(){
@@ -33,12 +34,20 @@ class Level2 extends Phaser.Scene {
 
         // Create a layer
         this.groundLayer = this.map.createLayer("Ground-n-Platforms", this.tileset, 0, 0);
+        this.lockLayer = this.map.createLayer("Locked", this.tileset, 0, 0);
+        this.bounceLayer = this.map.createLayer("Bounce", this.tileset, 0, 0);
         this.endingLayer = this.map.createLayer("Win", this.tileset, 0, 0);
         this.waterLayer = this.map.createLayer("Water", this.tileset, 0, 0);
         this.spikesLayer = this.map.createLayer("Spikes", this.tileset, 0, 0);
         
         // Make it collidable
         this.groundLayer.setCollisionByProperty({
+            collides: true
+        });
+        this.lockLayer.setCollisionByProperty({
+            collides: true
+        });
+        this.bounceLayer.setCollisionByProperty({
             collides: true
         });
         this.endingLayer.setCollisionByProperty({
@@ -66,14 +75,21 @@ class Level2 extends Phaser.Scene {
             key: "tilemap_sheet",
             frame: 151
         });
+        this.keys = this.map.createFromObjects("Key", {
+            name: "key",
+            key: "tilemap_sheet",
+            frame: 27
+        });
 
         // Since createFromObjects returns an array of regular Sprites, we need to convert 
         // them into Arcade Physics sprites (STATIC_BODY, so they don't move) 
         this.physics.world.enable(this.coins, Phaser.Physics.Arcade.STATIC_BODY);
+        this.physics.world.enable(this.keys, Phaser.Physics.Arcade.STATIC_BODY);
 
         // Create a Phaser group out of the array this.coins
         // This will be used for collision detection below.
         this.coinGroup = this.add.group(this.coins);
+        this.keyGroup = this.add.group(this.keys);
         
 
         // set up player avatar
@@ -82,6 +98,10 @@ class Level2 extends Phaser.Scene {
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
+        this.physics.add.collider(my.sprite.player, this.lockLayer);
+        this.physics.add.collider(my.sprite.player, this.bounceLayer, () =>{
+            this.bounceCollide();
+        });
         this.physics.add.collider(my.sprite.player, this.waterLayer, () =>{
             this.waterCollide();
         });
@@ -92,7 +112,9 @@ class Level2 extends Phaser.Scene {
             this.spikeCollide();
         });
 
+        //this.lockLayer.setCollisionByExclusion([-1]);
         this.endingLayer.setCollisionByExclusion([-1]);
+        this.bounceLayer.setCollisionByExclusion([-1]);
         this.waterLayer.setCollisionByExclusion([-1]);
         this.spikesLayer.setCollisionByExclusion([-1]);
 
@@ -119,6 +141,13 @@ class Level2 extends Phaser.Scene {
             this.sound.play("coinCollect");
             this.coinsCollected += 1;
             this.coinText.text = String(this.coinsCollected);
+        });
+
+        this.hasKey = false;
+        this.physics.add.overlap(my.sprite.player, this.keyGroup, (obj1, obj2) => {
+            obj2.destroy();
+            this.hasKey = true;
+            this.keyCollected();
         });
 
         // set up Phaser-provided cursor key input
@@ -164,15 +193,26 @@ class Level2 extends Phaser.Scene {
         
 
     }
+    keyCollected(){
+        this.lockLayer.destroy();
+    }
+
+    bounceCollide(){
+        my.sprite.player.body.setVelocityY(this.BOUNCE_VELOCITY);
+    }
 
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
         this.sound.play("playerDamage");
+        this.coinsCollected -=1;
+        this.coinText.text = String(this.coinsCollected);
     }
 
     spikeCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
         this.sound.play("playerDamage");
+        this.coinsCollected -=1;
+        this.coinText.text = String(this.coinsCollected);
     }
 
     endCollide() {
