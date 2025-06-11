@@ -206,13 +206,6 @@ class Platformer extends Phaser.Scene {
             my.sprite.player.setAccelerationX(-this.ACCELERATION);
             my.sprite.player.resetFlip();
             my.sprite.player.anims.play('walk', true);
-            // if (!this.playerMoving && my.sprite.player.body.blocked.down){
-            //     this.playerMoving = true;
-            //     this.time.delayedCall(300, () => {
-            //         this.sound.play("playerMove");
-            //         this.playerMoving = false;
-            //     });
-            // }
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth/2-10, my.sprite.player.displayHeight/2-5, false);
 
             my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY, 0);
@@ -229,13 +222,6 @@ class Platformer extends Phaser.Scene {
             my.sprite.player.setAccelerationX(this.ACCELERATION);
             my.sprite.player.setFlip(true, false);
             my.sprite.player.anims.play('walk', true);
-            // if (!this.playerMoving && my.sprite.player.body.blocked.down){
-            //     this.playerMoving = true;
-            //     this.time.delayedCall(300, () => {
-            //         this.sound.play("playerMove");
-            //         this.playerMoving = false;
-            //     });
-            // }
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth/2-10, my.sprite.player.displayHeight/2-5, false);
 
             my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY, 0);
