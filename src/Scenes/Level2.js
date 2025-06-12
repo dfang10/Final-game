@@ -260,21 +260,13 @@ class Level2 extends Phaser.Scene {
     }
 
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
-        my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
-        my.sprite.player.setVelocityX(0);
-        my.sprite.player.setVelocityY(0);
+        this.scene.restart();
         this.sound.play("playerDamage");
-        this.coinsCollected -=1;
-        this.coinText.text = String(this.coinsCollected);
     }
 
     spikeCollide() { // Player touches spike, player is sent back to spawn and sound is played
-        my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
-        my.sprite.player.setVelocityX(0);
-        my.sprite.player.setVelocityY(0);
+        this.scene.restart();
         this.sound.play("playerDamage");
-        this.coinsCollected -=1;
-        this.coinText.text = String(this.coinsCollected);
     }
 
     endCollide() { // Player collides with the ending flag
