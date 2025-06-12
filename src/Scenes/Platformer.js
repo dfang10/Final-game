@@ -88,7 +88,7 @@ class Platformer extends Phaser.Scene {
         my.sprite.player = this.physics.add.sprite(this.playerSpawn.x, this.playerSpawn.y, "platformer_characters", "tile_0000.png");
         my.sprite.player.setCollideWorldBounds(true);
 
-        my.sprite.player.setDragX(this.DRAG);
+        my.sprite.player.body.setMaxVelocity(this.SPEED_LIMIT, this.SPEED_LIMIT);
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
@@ -180,6 +180,8 @@ class Platformer extends Phaser.Scene {
 
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
+        my.sprite.player.setVelocityX(0);
+        my.sprite.player.setVelocityY(0);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
@@ -187,6 +189,8 @@ class Platformer extends Phaser.Scene {
 
     spikeCollide() { // Player touches spikes, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
+        my.sprite.player.setVelocityX(0);
+        my.sprite.player.setVelocityY(0);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
