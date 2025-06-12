@@ -12,6 +12,7 @@ class Level2 extends Phaser.Scene {
         this.PARTICLE_VELOCITY = 50;
         this.SCALE = 2.0;
         this.BOUNCE_VELOCITY = -700;
+        this.SPEED_LIMIT = 750;
         this.CRUMBLE_DELAY = 2000; // Time before crumbling starts
         this.CRUMBLE_DURATION = 2000; // Time crumbling animation takes
         this.CRUMBLE_RESPAWN = 2000;
@@ -106,7 +107,7 @@ class Level2 extends Phaser.Scene {
         my.sprite.player = this.physics.add.sprite(this.playerSpawn.x, this.playerSpawn.y, "platformer_characters", "tile_0000.png");
         my.sprite.player.setCollideWorldBounds(true);
 
-        my.sprite.player.setDragX(this.DRAG);
+        my.sprite.player.body.setMaxVelocity(this.SPEED_LIMIT, this.SPEED_LIMIT);
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);

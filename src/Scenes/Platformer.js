@@ -12,6 +12,7 @@ class Platformer extends Phaser.Scene {
         this.JUMP_VELOCITY = -600;
         this.PARTICLE_VELOCITY = 50;
         this.SCALE = 2.0;
+        this.SPEED_LIMIT = 750;
     }
 
     preload(){
@@ -87,7 +88,7 @@ class Platformer extends Phaser.Scene {
         my.sprite.player = this.physics.add.sprite(this.playerSpawn.x, this.playerSpawn.y, "platformer_characters", "tile_0000.png");
         my.sprite.player.setCollideWorldBounds(true);
 
-        my.sprite.player.setDragX(this.DRAG);
+        my.sprite.player.body.setMaxVelocity(this.SPEED_LIMIT, this.SPEED_LIMIT);
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
