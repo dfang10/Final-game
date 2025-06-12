@@ -222,17 +222,6 @@ class Level2 extends Phaser.Scene {
 
     }
 
-    moveMoving(time) {
-        const widthA = 18*9;
-        const periodA = 4000;
-        const pA = (Math.sin(time * 2 * Math.PI / periodA) + 1)/2;
-        this.movingALayer.x = widthA * pA;
-        const widthB = 18*21;
-        const periodB = 5000;
-        const pB = (Math.sin(time * 2 * Math.PI / periodB) + 1)/2;
-        this.movingBLayer.x = widthB * pB;
-    }
-
     keyCollected(){ // Player collects key function
         this.sound.play("keyCollected");
         this.lockLayer.setCollisionByExclusion([-1], false);
@@ -296,8 +285,15 @@ class Level2 extends Phaser.Scene {
         this.sound.play("winJingle");
         this.scene.start("winScreen");
     }
+
+    movingOffset(width, period, time) {
+        const p = (Math.sin(time * 2 * Math.PI / period) + 1)/2;
+        return width * p;
+    }
+
     update(time) {
-        this.moveMoving(time);
+        this.movingALayer.x = this.movingOffset(18*9, 4000, time);
+        this.movingBLayer.x = this.movingOffset(18*21, 5000, time);
 
         if (cursors.left.isDown || cursors.right.isDown){ // Playing sound when player moves
             if (!this.playerMoving && my.sprite.player.body.blocked.down){
