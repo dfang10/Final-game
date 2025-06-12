@@ -7,11 +7,11 @@ class Platformer extends Phaser.Scene {
         // variables and settings
         this.ACCELERATION = 400;
         this.DRAG = 1200;    // DRAG < ACCELERATION = icy slide
+        this.BRAKE_DRAG = 1200;
         this.physics.world.gravity.y = 1500;
         this.JUMP_VELOCITY = -600;
         this.PARTICLE_VELOCITY = 50;
         this.SCALE = 2.0;
-        this.SPEED_LIMIT = 750;
     }
 
     preload(){
@@ -87,7 +87,7 @@ class Platformer extends Phaser.Scene {
         my.sprite.player = this.physics.add.sprite(this.playerSpawn.x, this.playerSpawn.y, "platformer_characters", "tile_0000.png");
         my.sprite.player.setCollideWorldBounds(true);
 
-        my.sprite.player.body.setMaxVelocity(this.SPEED_LIMIT, this.SPEED_LIMIT);
+        my.sprite.player.setDragX(this.DRAG);
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
@@ -170,7 +170,7 @@ class Platformer extends Phaser.Scene {
 
         this.physics.world.setBounds(0, 0, 4320, 900);
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        this.cameras.main.startFollow(my.sprite.player); // (target, [,roundPixels][,lerpX][,lerpY])
+        this.cameras.main.startFollow(my.sprite.player); 
         this.cameras.main.setDeadzone(50, 50);
         this.cameras.main.setZoom(this.SCALE);
         
@@ -179,8 +179,6 @@ class Platformer extends Phaser.Scene {
 
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
-        my.sprite.player.setVelocityX(0);
-        my.sprite.player.setVelocityY(0);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
@@ -188,8 +186,6 @@ class Platformer extends Phaser.Scene {
 
     spikeCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
-        my.sprite.player.setVelocityX(0);
-        my.sprite.player.setVelocityY(0);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
