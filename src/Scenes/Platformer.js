@@ -25,7 +25,7 @@ class Platformer extends Phaser.Scene {
     }
 
     create() {
-        this.map = this.add.tilemap("Design", 18, 18, 4320, 50);
+        this.map = this.add.tilemap("Design", 18, 18, 4320, 50); // Load the map
 
         // Add a tileset to the map
         // First parameter: name we gave the tileset in Tiled
@@ -102,13 +102,14 @@ class Platformer extends Phaser.Scene {
             this.spikeCollide();
         }); 
 
+        // Needed for some of the layers, player phases through if not included
         this.platformLayer.setCollisionByExclusion([-1]);
         this.endingLayer.setCollisionByExclusion([-1]);
         this.waterLayer.setCollisionByExclusion([-1]);
         this.spikesLayer.setCollisionByExclusion([-1]);
 
 
-        my.vfx.coinCollect = this.add.particles(0, 0, "kenny-particles", {
+        my.vfx.coinCollect = this.add.particles(0, 0, "kenny-particles", { // Coin collect animation
             frame: ['star_07.png', 'star_08.png'],
             scale: {start: 0.03, end: 0.1},
             lifespan: 350,
@@ -119,10 +120,10 @@ class Platformer extends Phaser.Scene {
 
         // Handle collision detection with coins
         this.coinsCollected = 0;
-        this.coinText = this.add.text(1500/4, 950/4, String(this.coinsCollected), { fontFamily: '"Lucida Console", "Courier New", monospace' });
+        this.coinText = this.add.text(1500/4, 950/4, String(this.coinsCollected), { fontFamily: '"Lucida Console", "Courier New", monospace' }); // Score board for coin
         this.coinText.setScrollFactor(0);
 
-        this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => {
+        this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => { // Player collides with coin, play animation and add score
             obj2.destroy();
             my.vfx.coinCollect.setPosition(obj2.x, obj2.y);
             my.vfx.coinCollect.start();
@@ -144,7 +145,7 @@ class Platformer extends Phaser.Scene {
             this.physics.world.debugGraphic.clear()
         }, this);
 
-        my.vfx.walking = this.add.particles(0, 0, "kenny-particles", {
+        my.vfx.walking = this.add.particles(0, 0, "kenny-particles", { // Player moving animation
             frame: ['spark_01.png', 'spark_02.png'],
             random: true,
             scale: {start: 0.01, end: 0.04},
@@ -157,7 +158,7 @@ class Platformer extends Phaser.Scene {
 
         my.vfx.walking.stop();
 
-        my.vfx.jumping = this.add.particles(0,0, "kenny-particles", {
+        my.vfx.jumping = this.add.particles(0,0, "kenny-particles", { // Player jumping animation
             frame: ['spark_05.png'],
             scale: {start: 0.03, end: 0.05},
             lifespan: 350,
@@ -168,13 +169,12 @@ class Platformer extends Phaser.Scene {
         my.vfx.jumping.stop();
         
 
+        // Camera physics
         this.physics.world.setBounds(0, 0, 4320, 900);
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(my.sprite.player); 
         this.cameras.main.setDeadzone(50, 50);
         this.cameras.main.setZoom(this.SCALE);
-        
-
     }
 
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
@@ -184,19 +184,19 @@ class Platformer extends Phaser.Scene {
         this.coinText.text = String(this.coinsCollected);
     }
 
-    spikeCollide() { // Player touches water, player is sent back to spawn and sound is played
+    spikeCollide() { // Player touches spikes, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
     }
 
-    endCollide() {
+    endCollide() { // Player collides with ending flag, go to next scene
         this.sound.play("winJingle");
         this.scene.start("level2");
     }
     update() {
-        if (cursors.left.isDown || cursors.right.isDown){
+        if (cursors.left.isDown || cursors.right.isDown){ // Play sound for when player is moving left or right
             if (!this.playerMoving && my.sprite.player.body.blocked.down){
                 this.playerMoving = true;
                 this.time.delayedCall(300, () => {
@@ -205,7 +205,7 @@ class Platformer extends Phaser.Scene {
                 });
             }
         }
-        if(cursors.left.isDown) {
+        if(cursors.left.isDown) { // Player moving left
             const vx = my.sprite.player.body.velocity.x;
             if (vx > 0) {          
                 my.sprite.player.setAccelerationX(0);
@@ -228,7 +228,7 @@ class Platformer extends Phaser.Scene {
 
             }
 
-        } else if(cursors.right.isDown) {
+        } else if(cursors.right.isDown) { // Player moving right
             const vx = my.sprite.player.body.velocity.x;
             if (vx < 0) { 
                 my.sprite.player.setAccelerationX(0);

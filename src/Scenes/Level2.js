@@ -14,24 +14,24 @@ class Level2 extends Phaser.Scene {
         this.BOUNCE_VELOCITY = -700;
         this.CRUMBLE_DELAY = 2000; // Time before crumbling starts
         this.CRUMBLE_DURATION = 2000; // Time crumbling animation takes
-        this.CRUMBLE_RESPAWN = 2000;
+        this.CRUMBLE_RESPAWN = 2000; // Time it takes for platform to respawn
     }
 
     preload(){
         this.load.setPath("./assets/");
-        this.load.audio("coinCollect", "powerUp4.ogg"); 
+        this.load.audio("coinCollect", "powerUp4.ogg");
         this.load.audio("playerDamage", "zapThreeToneDown.ogg");
         this.load.audio("playerMove", "footstep_grass_001.ogg");
         this.load.audio("playerJump", "phaserUp2.ogg");
         this.load.audio("playerBounce", "phaserUp1.ogg");
-        this.load.audio("keyCollected", "jingles_NES12.ogg"); // Collecting key
-        this.load.audio("platformCrumble", "impactTin_medium_001.ogg"); // Sound for disappearing platforms
-        this.load.audio("winJingle", "jingles_HIT11.ogg"); // Win sound
+        this.load.audio("keyCollected", "jingles_NES12.ogg"); 
+        this.load.audio("platformCrumble", "impactTin_medium_001.ogg"); 
+        this.load.audio("winJingle", "jingles_HIT11.ogg"); 
 
     }
 
     create() {
-        this.map = this.add.tilemap("Design2", 18, 18, 4320, 50);
+        this.map = this.add.tilemap("Design2", 18, 18, 4320, 50); // Add map
 
         // Add a tileset to the map
         // First parameter: name we gave the tileset in Tiled
@@ -128,13 +128,14 @@ class Level2 extends Phaser.Scene {
             this.crumbleCollide(player, tile)
         });
 
+        // Needed for some of the layers, player phases through if not included
         this.endingLayer.setCollisionByExclusion([-1]);
         this.bounceLayer.setCollisionByExclusion([-1]);
         this.waterLayer.setCollisionByExclusion([-1]);
         this.spikesLayer.setCollisionByExclusion([-1]);
 
 
-        my.vfx.coinCollect = this.add.particles(0, 0, "kenny-particles", {
+        my.vfx.coinCollect = this.add.particles(0, 0, "kenny-particles", { // Coin collect animation
             frame: ['star_07.png', 'star_08.png'],
             scale: {start: 0.03, end: 0.1},
             lifespan: 350,
@@ -148,7 +149,7 @@ class Level2 extends Phaser.Scene {
         this.coinText = this.add.text(1500/4, 950/4, String(this.coinsCollected), { fontFamily: '"Lucida Console", "Courier New", monospace' });
         this.coinText.setScrollFactor(0);
         
-        this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => {
+        this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => { // Play the coin collect animation and add a coin to the score
             obj2.destroy();
             my.vfx.coinCollect.setPosition(obj2.x, obj2.y);
             my.vfx.coinCollect.start();
@@ -158,8 +159,8 @@ class Level2 extends Phaser.Scene {
             this.coinText.text = String(this.coinsCollected);
         });
 
-        this.hasKey = false;
-        this.physics.add.overlap(my.sprite.player, this.keyGroup, (obj1, obj2) => {
+        this.hasKey = false; // Key collection
+        this.physics.add.overlap(my.sprite.player, this.keyGroup, (obj1, obj2) => { // If the player picks up the key
             obj2.destroy();
             this.hasKey = true;
             this.keyCollected();
@@ -168,7 +169,7 @@ class Level2 extends Phaser.Scene {
         // set up Phaser-provided cursor key input
         cursors = this.input.keyboard.createCursorKeys();
 
-        this.rKey = this.input.keyboard.addKey('R');
+        this.rKey = this.input.keyboard.addKey('R'); // Restart scene
 
         // debug key listener (assigned to D key)
         this.input.keyboard.on('keydown-D', () => {
@@ -176,7 +177,7 @@ class Level2 extends Phaser.Scene {
             this.physics.world.debugGraphic.clear()
         }, this);
 
-        my.vfx.walking = this.add.particles(0, 0, "kenny-particles", {
+        my.vfx.walking = this.add.particles(0, 0, "kenny-particles", { // Walking animation
             frame: ['spark_01.png', 'spark_02.png'],
             random: true,
             scale: {start: 0.01, end: 0.04},
@@ -189,7 +190,7 @@ class Level2 extends Phaser.Scene {
 
         my.vfx.walking.stop();
 
-        my.vfx.jumping = this.add.particles(0,0, "kenny-particles", {
+        my.vfx.jumping = this.add.particles(0,0, "kenny-particles", { // Jumping animation
             frame: ['spark_05.png'],
             scale: {start: 0.03, end: 0.05},
             lifespan: 350,
@@ -200,20 +201,21 @@ class Level2 extends Phaser.Scene {
         my.vfx.jumping.stop();
         
 
+        // Camera physics
         this.physics.world.setBounds(0, 0, 4320, 900);
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        this.cameras.main.startFollow(my.sprite.player); // (target, [,roundPixels][,lerpX][,lerpY])
+        this.cameras.main.startFollow(my.sprite.player);
         this.cameras.main.setDeadzone(50, 50);
         this.cameras.main.setZoom(this.SCALE);
         
 
     }
-    keyCollected(){ 
+    keyCollected(){ // Player collects key function
         my.sprite.player.setPosition(1188, 800);
         this.sound.play("keyCollected");
     }
 
-    crumbleCollide(player, tile) {
+    crumbleCollide(player, tile) { // Player touches a crumbling platform
         // Skip if already crumbling
         if (tile.crumbling) return;
         tile.crumbling = true;
@@ -222,11 +224,12 @@ class Level2 extends Phaser.Scene {
         const tileY = tile.y;
         const tileIndex = tile.index;
 
-        // Start crumble timer (visual or just delay)
+        // Start crumble timer which deletes the tile after the duration of crumble duration
         this.time.delayedCall(this.CRUMBLE_DURATION, () => {
             const worldPoint = this.crumblingLayer.tileToWorldXY(tileX, tileY);
             this.crumblingLayer.removeTileAtWorldXY(worldPoint.x, worldPoint.y);
 
+        // After a little bit the tile respawns at the same spot.
         this.time.delayedCall(this.CRUMBLE_RESPAWN, () => {
             const newTile = this.crumblingLayer.putTileAtWorldXY(
                 tileIndex,
@@ -234,7 +237,7 @@ class Level2 extends Phaser.Scene {
                 worldPoint.y
             );
 
-            this.crumblingLayer.setCollision(tileIndex, true);
+            this.crumblingLayer.setCollision(tileIndex, true); // Add back the collision to the tile
 
             this.crumblingLayer.calculateFacesWithin(
                 newTile.x,
@@ -243,14 +246,14 @@ class Level2 extends Phaser.Scene {
                 1
             );
 
-            newTile.crumbling = false;
+            newTile.crumbling = false; // Tile is no longer crumbling
         });
         });
 
-        this.sound.play("platformCrumble");
+        this.sound.play("platformCrumble"); // Play a sound
     }
 
-    bounceCollide(){
+    bounceCollide(){ // Player collides with bounce pad which bounces the player up
         my.sprite.player.body.setVelocityY(this.BOUNCE_VELOCITY);
         this.sound.play("playerBounce");
     }
@@ -262,19 +265,19 @@ class Level2 extends Phaser.Scene {
         this.coinText.text = String(this.coinsCollected);
     }
 
-    spikeCollide() { // Player touches water, player is sent back to spawn and sound is played
+    spikeCollide() { // Player touches spike, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
     }
 
-    endCollide() {
+    endCollide() { // Player collides with the ending flag
         this.sound.play("winJingle");
         this.scene.start("winScreen");
     }
     update() {
-        if (cursors.left.isDown || cursors.right.isDown){
+        if (cursors.left.isDown || cursors.right.isDown){ // Playing sound when player moves
             if (!this.playerMoving && my.sprite.player.body.blocked.down){
                 this.playerMoving = true;
                 this.time.delayedCall(300, () => {
@@ -283,7 +286,7 @@ class Level2 extends Phaser.Scene {
                 });
             }
         }
-        if(cursors.left.isDown) {
+        if(cursors.left.isDown) { // Player moving left
             const vx = my.sprite.player.body.velocity.x;
             if (vx > 0) {          
                 my.sprite.player.setAccelerationX(0);
@@ -306,7 +309,7 @@ class Level2 extends Phaser.Scene {
 
             }
 
-        } else if(cursors.right.isDown) {
+        } else if(cursors.right.isDown) { // Player moving right
             const vx = my.sprite.player.body.velocity.x;
             if (vx < 0) { 
                 my.sprite.player.setAccelerationX(0);
