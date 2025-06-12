@@ -7,7 +7,6 @@ class Platformer extends Phaser.Scene {
         // variables and settings
         this.ACCELERATION = 400;
         this.DRAG = 1200;    // DRAG < ACCELERATION = icy slide
-        this.BRAKE_DRAG = 1200;
         this.physics.world.gravity.y = 1500;
         this.JUMP_VELOCITY = -600;
         this.PARTICLE_VELOCITY = 50;
@@ -180,6 +179,8 @@ class Platformer extends Phaser.Scene {
 
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
+        my.sprite.player.setVelocityX(0);
+        my.sprite.player.setVelocityY(0);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
@@ -187,6 +188,8 @@ class Platformer extends Phaser.Scene {
 
     spikeCollide() { // Player touches water, player is sent back to spawn and sound is played
         my.sprite.player.setPosition(this.playerSpawn.x, this.playerSpawn.y);
+        my.sprite.player.setVelocityX(0);
+        my.sprite.player.setVelocityY(0);
         this.sound.play("playerDamage");
         this.coinsCollected -=1;
         this.coinText.text = String(this.coinsCollected);
