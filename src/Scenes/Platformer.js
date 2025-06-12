@@ -6,7 +6,8 @@ class Platformer extends Phaser.Scene {
     init() {
         // variables and settings
         this.ACCELERATION = 400;
-        this.DRAG = 2000;    // DRAG < ACCELERATION = icy slide
+        this.DRAG = 1200;    // DRAG < ACCELERATION = icy slide
+        this.BRAKE_DRAG = 1200;
         this.physics.world.gravity.y = 1500;
         this.JUMP_VELOCITY = -600;
         this.PARTICLE_VELOCITY = 50;
@@ -85,6 +86,8 @@ class Platformer extends Phaser.Scene {
         // set up player avatar
         my.sprite.player = this.physics.add.sprite(this.playerSpawn.x, this.playerSpawn.y, "platformer_characters", "tile_0000.png");
         my.sprite.player.setCollideWorldBounds(true);
+
+        my.sprite.player.setDragX(this.DRAG);
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
@@ -203,7 +206,14 @@ class Platformer extends Phaser.Scene {
             }
         }
         if(cursors.left.isDown) {
-            my.sprite.player.setAccelerationX(-this.ACCELERATION);
+            const vx = my.sprite.player.body.velocity.x;
+            if (vx > 0) {          
+                my.sprite.player.setAccelerationX(0);
+                my.sprite.player.setDragX(this.DRAG);
+            } else { 
+                my.sprite.player.setDragX(0);
+                my.sprite.player.setAccelerationX(-this.ACCELERATION);
+            }
             my.sprite.player.resetFlip();
             my.sprite.player.anims.play('walk', true);
             // if (!this.playerMoving && my.sprite.player.body.blocked.down){
@@ -226,7 +236,14 @@ class Platformer extends Phaser.Scene {
             }
 
         } else if(cursors.right.isDown) {
-            my.sprite.player.setAccelerationX(this.ACCELERATION);
+            const vx = my.sprite.player.body.velocity.x;
+            if (vx < 0) { 
+                my.sprite.player.setAccelerationX(0);
+                my.sprite.player.setDragX(this.DRAG);
+            } else { 
+                my.sprite.player.setDragX(0);
+                my.sprite.player.setAccelerationX(this.ACCELERATION);
+            }
             my.sprite.player.setFlip(true, false);
             my.sprite.player.anims.play('walk', true);
             // if (!this.playerMoving && my.sprite.player.body.blocked.down){
