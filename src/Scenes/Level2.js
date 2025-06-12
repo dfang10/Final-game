@@ -99,6 +99,11 @@ class Level2 extends Phaser.Scene {
             key: "tilemap_sheet",
             frame: 27
         });
+        this.enemies = this.map.createFromObjects("Enemy", {
+            name: "enemy",
+            key: "tilemap_sheet",
+            frame: 145
+        });
 
         // Since createFromObjects returns an array of regular Sprites, we need to convert 
         // them into Arcade Physics sprites (STATIC_BODY, so they don't move) 
@@ -109,7 +114,11 @@ class Level2 extends Phaser.Scene {
         // This will be used for collision detection below.
         this.coinGroup = this.add.group(this.coins);
         this.keyGroup = this.add.group(this.keys);
-        
+        this.enemyGroup = this.add.group(this.enemies);
+
+        for (const enemy of this.enemyGroup.children.entries) {
+            enemy.startY = enemy.y;
+        }
 
         // set up player avatar
         my.sprite.player = this.physics.add.sprite(this.playerSpawn.x, this.playerSpawn.y, "platformer_characters", "tile_0000.png");
@@ -168,6 +177,12 @@ class Level2 extends Phaser.Scene {
             this.sound.play("coinCollect");
             this.coinsCollected += 1;
             this.coinText.text = String(this.coinsCollected);
+        });
+
+        //Handle collision detection with enemies
+        this.physics.add.overlap(my.sprite.player, this.enemyGroup, (obj1, obj2) => {
+            this.scene.restart();
+            this.sound.play("playerDamage");
         });
 
         this.hasKey = false; // Key collection
@@ -294,7 +309,9 @@ class Level2 extends Phaser.Scene {
     update(time) {
         this.movingALayer.x = this.movingOffset(18*9, 4000, time);
         this.movingBLayer.x = this.movingOffset(18*21, 5000, time);
-
+        for(const enemy of this.enemyGroup.children.entries) {
+            enemy.y = enemy.startY - this.movingOffset(18*9, 4000, time);
+        }
         if (cursors.left.isDown || cursors.right.isDown){ // Playing sound when player moves
             if (!this.playerMoving && my.sprite.player.body.blocked.down){
                 this.playerMoving = true;
