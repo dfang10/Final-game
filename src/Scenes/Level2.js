@@ -212,8 +212,9 @@ class Level2 extends Phaser.Scene {
 
     }
     keyCollected(){ // Player collects key function
-        my.sprite.player.setPosition(1188, 800);
         this.sound.play("keyCollected");
+        this.lockLayer.setCollisionByExclusion([-1], false);
+        this.lockLayer.visible = false;
     }
 
     crumbleCollide(player, tile) { // Player touches a crumbling platform
