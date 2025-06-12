@@ -14,7 +14,7 @@ class Level2 extends Phaser.Scene {
         this.SPEED_LIMIT = 750;
         this.BOUNCE_VELOCITY = -700;
         this.CRUMBLE_DELAY = 2000; // Time before crumbling starts
-        this.CRUMBLE_DURATION = 2000; // Time crumbling animation takes
+        this.CRUMBLE_DURATION = 500; // Time crumbling animation takes
         this.CRUMBLE_RESPAWN = 2000; // Time it takes for platform to respawn
     }
 
