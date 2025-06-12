@@ -41,6 +41,8 @@ class Level2 extends Phaser.Scene {
 
         // Create a layer
         this.groundLayer = this.map.createLayer("Ground-n-Platforms", this.tileset, 0, 0);
+        this.movingALayer = this.map.createLayer("MovingA", this.tileset, 0,0);
+        this.movingBLayer = this.map.createLayer("MovingB", this.tileset, 0,0);
         this.crumblingLayer = this.map.createLayer("Crumbling", this.tileset, 0,0);
         this.lockLayer = this.map.createLayer("Locked", this.tileset, 0, 0);
         this.bounceLayer = this.map.createLayer("Bounce", this.tileset, 0, 0);
@@ -50,6 +52,12 @@ class Level2 extends Phaser.Scene {
         
         // Make it collidable
         this.groundLayer.setCollisionByProperty({
+            collides: true
+        });
+        this.movingALayer.setCollisionByProperty({
+            collides: true
+        });
+        this.movingBLayer.setCollisionByProperty({
             collides: true
         });
         this.crumblingLayer.setCollisionByProperty({
@@ -111,6 +119,8 @@ class Level2 extends Phaser.Scene {
 
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
+        this.physics.add.collider(my.sprite.player, this.movingALayer);
+        this.physics.add.collider(my.sprite.player, this.movingBLayer);
         this.physics.add.collider(my.sprite.player, this.lockLayer);
 
         this.physics.add.collider(my.sprite.player, this.bounceLayer, () =>{
@@ -211,6 +221,18 @@ class Level2 extends Phaser.Scene {
         
 
     }
+
+    moveMoving(time) {
+        const widthA = 18*9;
+        const periodA = 4000;
+        const pA = (Math.sin(time * 2 * Math.PI / periodA) + 1)/2;
+        this.movingALayer.x = widthA * pA;
+        const widthB = 18*21;
+        const periodB = 5000;
+        const pB = (Math.sin(time * 2 * Math.PI / periodB) + 1)/2;
+        this.movingBLayer.x = widthB * pB;
+    }
+
     keyCollected(){ // Player collects key function
         this.sound.play("keyCollected");
         this.lockLayer.setCollisionByExclusion([-1], false);
@@ -274,7 +296,9 @@ class Level2 extends Phaser.Scene {
         this.sound.play("winJingle");
         this.scene.start("winScreen");
     }
-    update() {
+    update(time) {
+        this.moveMoving(time);
+
         if (cursors.left.isDown || cursors.right.isDown){ // Playing sound when player moves
             if (!this.playerMoving && my.sprite.player.body.blocked.down){
                 this.playerMoving = true;
