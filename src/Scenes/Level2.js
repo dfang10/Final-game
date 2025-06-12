@@ -12,15 +12,21 @@ class Level2 extends Phaser.Scene {
         this.PARTICLE_VELOCITY = 50;
         this.SCALE = 2.0;
         this.BOUNCE_VELOCITY = -700;
+        this.CRUMBLE_DELAY = 2000; // Time before crumbling starts
+        this.CRUMBLE_DURATION = 2000; // Time crumbling animation takes
+        this.CRUMBLE_RESPAWN = 2000;
     }
 
     preload(){
         this.load.setPath("./assets/");
-        this.load.audio("coinCollect", "powerUp4.ogg");
+        this.load.audio("coinCollect", "powerUp4.ogg"); 
         this.load.audio("playerDamage", "zapThreeToneDown.ogg");
         this.load.audio("playerMove", "footstep_grass_001.ogg");
         this.load.audio("playerJump", "phaserUp2.ogg");
-        this.load.audio("winJingle", "jingles_HIT11.ogg");
+        this.load.audio("playerBounce", "phaserUp1.ogg");
+        this.load.audio("keyCollected", "jingles_NES12.ogg"); // Collecting key
+        this.load.audio("platformCrumble", "impactTin_medium_001.ogg"); // Sound for disappearing platforms
+        this.load.audio("winJingle", "jingles_HIT11.ogg"); // Win sound
 
     }
 
@@ -34,6 +40,7 @@ class Level2 extends Phaser.Scene {
 
         // Create a layer
         this.groundLayer = this.map.createLayer("Ground-n-Platforms", this.tileset, 0, 0);
+        this.crumblingLayer = this.map.createLayer("Crumbling", this.tileset, 0,0);
         this.lockLayer = this.map.createLayer("Locked", this.tileset, 0, 0);
         this.bounceLayer = this.map.createLayer("Bounce", this.tileset, 0, 0);
         this.endingLayer = this.map.createLayer("Win", this.tileset, 0, 0);
@@ -42,6 +49,9 @@ class Level2 extends Phaser.Scene {
         
         // Make it collidable
         this.groundLayer.setCollisionByProperty({
+            collides: true
+        });
+        this.crumblingLayer.setCollisionByProperty({
             collides: true
         });
         this.lockLayer.setCollisionByProperty({
@@ -101,6 +111,7 @@ class Level2 extends Phaser.Scene {
         // Enable collision handling
         this.physics.add.collider(my.sprite.player, this.groundLayer);
         this.physics.add.collider(my.sprite.player, this.lockLayer);
+
         this.physics.add.collider(my.sprite.player, this.bounceLayer, () =>{
             this.bounceCollide();
         });
@@ -113,8 +124,10 @@ class Level2 extends Phaser.Scene {
         this.physics.add.collider(my.sprite.player, this.spikesLayer, () =>{
             this.spikeCollide();
         });
+        this.physics.add.collider(my.sprite.player, this.crumblingLayer, (player, tile) =>{
+            this.crumbleCollide(player, tile)
+        });
 
-        //this.lockLayer.setCollisionByExclusion([-1]);
         this.endingLayer.setCollisionByExclusion([-1]);
         this.bounceLayer.setCollisionByExclusion([-1]);
         this.waterLayer.setCollisionByExclusion([-1]);
@@ -195,12 +208,51 @@ class Level2 extends Phaser.Scene {
         
 
     }
-    keyCollected(){
-        this.lockLayer.destroy();
+    keyCollected(){ 
+        my.sprite.player.setPosition(1188, 800);
+        this.sound.play("keyCollected");
+    }
+
+    crumbleCollide(player, tile) {
+        // Skip if already crumbling
+        if (tile.crumbling) return;
+        tile.crumbling = true;
+
+        const tileX = tile.x;
+        const tileY = tile.y;
+        const tileIndex = tile.index;
+
+        // Start crumble timer (visual or just delay)
+        this.time.delayedCall(this.CRUMBLE_DURATION, () => {
+            const worldPoint = this.crumblingLayer.tileToWorldXY(tileX, tileY);
+            this.crumblingLayer.removeTileAtWorldXY(worldPoint.x, worldPoint.y);
+
+        this.time.delayedCall(this.CRUMBLE_RESPAWN, () => {
+            const newTile = this.crumblingLayer.putTileAtWorldXY(
+                tileIndex,
+                worldPoint.x,
+                worldPoint.y
+            );
+
+            this.crumblingLayer.setCollision(tileIndex, true);
+
+            this.crumblingLayer.calculateFacesWithin(
+                newTile.x,
+                newTile.y,
+                1,
+                1
+            );
+
+            newTile.crumbling = false;
+        });
+        });
+
+        this.sound.play("platformCrumble");
     }
 
     bounceCollide(){
         my.sprite.player.body.setVelocityY(this.BOUNCE_VELOCITY);
+        this.sound.play("playerBounce");
     }
 
     waterCollide() { // Player touches water, player is sent back to spawn and sound is played
@@ -242,13 +294,6 @@ class Level2 extends Phaser.Scene {
             }
             my.sprite.player.resetFlip();
             my.sprite.player.anims.play('walk', true);
-            // if (!this.playerMoving && my.sprite.player.body.blocked.down){
-            //     this.playerMoving = true;
-            //     this.time.delayedCall(300, () => {
-            //         this.sound.play("playerMove");
-            //         this.playerMoving = false;
-            //     });
-            // }
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth/2-10, my.sprite.player.displayHeight/2-5, false);
 
             my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY, 0);
@@ -272,13 +317,6 @@ class Level2 extends Phaser.Scene {
             }
             my.sprite.player.setFlip(true, false);
             my.sprite.player.anims.play('walk', true);
-            // if (!this.playerMoving && my.sprite.player.body.blocked.down){
-            //     this.playerMoving = true;
-            //     this.time.delayedCall(300, () => {
-            //         this.sound.play("playerMove");
-            //         this.playerMoving = false;
-            //     });
-            // }
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth/2-10, my.sprite.player.displayHeight/2-5, false);
 
             my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY, 0);
