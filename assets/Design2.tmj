@@ -603,18 +603,6 @@
                  "width":18,
                  "x":4212,
                  "y":630
-                }, 
-                {
-                 "gid":146,
-                 "height":18,
-                 "id":87,
-                 "name":"enemy",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":18,
-                 "x":198,
-                 "y":828
                 }],
          "opacity":1,
          "type":"objectgroup",

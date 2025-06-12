@@ -102,13 +102,15 @@ class Level2 extends Phaser.Scene {
         this.enemies = this.map.createFromObjects("Enemy", {
             name: "enemy",
             key: "tilemap_sheet",
-            frame: 145
+            frame: 145,
         });
 
         // Since createFromObjects returns an array of regular Sprites, we need to convert 
         // them into Arcade Physics sprites (STATIC_BODY, so they don't move) 
         this.physics.world.enable(this.coins, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.world.enable(this.keys, Phaser.Physics.Arcade.STATIC_BODY);
+        this.physics.world.enable(this.enemies, Phaser.Physics.Arcade.DYNAMIC_BODY);
+
 
         // Create a Phaser group out of the array this.coins
         // This will be used for collision detection below.
@@ -118,6 +120,7 @@ class Level2 extends Phaser.Scene {
 
         for (const enemy of this.enemyGroup.children.entries) {
             enemy.startY = enemy.y;
+            enemy.body.setAllowGravity(false);
         }
 
         // set up player avatar
